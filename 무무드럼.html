@@ -410,6 +410,13 @@ body {
                         <option value="dnb">🎮 드럼앤베이스</option>
                         <option value="trap">🔫 트랩</option>
                     </optgroup>
+                    <optgroup label="🌴 웨스트코스트 레전드">
+                        <option value="still_dre">🎤 Still D.R.E.</option>
+                        <option value="next_ep">🌿 The Next Episode</option>
+                        <option value="gthang">🍋 Nuthin But A G Thang</option>
+                        <option value="drop_it">💧 Drop It Like It's Hot</option>
+                        <option value="gin_juice">🍹 Gin And Juice</option>
+                    </optgroup>
                 </select>
                 <button id="preset-load-btn" class="btn btn-small">적용</button>
             </div>
@@ -511,6 +518,32 @@ const PRESETS = {
         snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
         hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
         clap:  [0,0,1,0,0,1,0,0,0,1,0,0,0,0,1,0] },
+    // ── 웨스트코스트 레전드 ──
+    still_dre: { name:'🎤 Still D.R.E.',         bpm:93,
+        kick:  [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
+    next_ep:   { name:'🌿 The Next Episode',      bpm:94,
+        kick:  [1,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
+    gthang:    { name:'🍋 Nuthin But A G Thang',  bpm:100,
+        kick:  [1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0] },
+    drop_it:   { name:'💧 Drop It Like Its Hot',  bpm:80,
+        kick:  [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0],
+        clap:  [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1] },
+    gin_juice: { name:'🍹 Gin And Juice',         bpm:90,
+        kick:  [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
 };
 
 const PRESET_BG = {
@@ -522,6 +555,8 @@ const PRESET_BG = {
     funk:'funk', disco:'funk',
     jazz:'jazz',
     dnb:'dnb',
+    still_dre:'hiphop', next_ep:'hiphop', gthang:'hiphop',
+    drop_it:'hiphop', gin_juice:'hiphop',
 };
 
 // --- 상태 ---
