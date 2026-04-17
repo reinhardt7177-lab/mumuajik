@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥁 무무드럼 - 리듬 드럼머신</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --bg: #0a0a1a;
+    --surface: #141428;
+    --surface2: #1e1e3a;
+    --text: #e0e0ff;
+    --dim: #8888aa;
+    --kick:  #ff3366;
+    --snare: #33ccff;
+    --hihat: #ffcc33;
+    --clap:  #66ff88;
+    --accent: #aa55ff;
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+    min-height: 100vh;
+}
+
+.app {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+/* 헤더 */
+.header { text-align: center; padding: 20px 0 16px; }
+
+.logo {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--kick), var(--accent), var(--snare));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle { color: var(--dim); margin-top: 4px; font-size: 0.9rem; }
+
+/* 컨트롤 바 */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+
+.btn-play {
+    background: linear-gradient(135deg, #22cc66, #44ffaa);
+    color: #000;
+    box-shadow: 0 0 18px #22cc6644;
+}
+.btn-play:hover { box-shadow: 0 0 28px #22cc6699; transform: scale(1.05); }
+
+.btn-stop {
+    background: linear-gradient(135deg, #ff3355, #ff7788);
+    color: #fff;
+    box-shadow: 0 0 18px #ff335544;
+}
+.btn-stop:hover { box-shadow: 0 0 28px #ff335588; transform: scale(1.05); }
+
+.btn-small {
+    padding: 7px 14px;
+    font-size: 0.82rem;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid #333355;
+}
+.btn-small:hover { background: #2a2a50; border-color: var(--accent); }
+.btn-danger:hover { border-color: var(--kick); color: var(--kick); }
+
+.btn-music {
+    background: var(--surface2);
+    color: var(--dim);
+    border: 1px solid #444466;
+    font-size: 0.88rem;
+}
+.btn-music.active {
+    background: linear-gradient(135deg, #33aaff22, #aa55ff22);
+    color: var(--snare);
+    border-color: var(--snare);
+    box-shadow: 0 0 14px #33aaff33;
+}
+
+.btn-random {
+    background: linear-gradient(135deg, #ff6644, #ffcc33);
+    color: #000;
+    font-weight: 800;
+    box-shadow: 0 0 16px #ff664444;
+}
+.btn-random:hover { box-shadow: 0 0 26px #ff664488; transform: scale(1.05); }
+
+/* 스텝 선택 */
+.step-selector {
+    display: flex;
+    gap: 3px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 3px;
+}
+.step-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--dim);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+}
+.step-btn:hover { color: var(--text); background: #2a2a50; }
+.step-btn.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 12px var(--accent);
+}
+
+/* 비주얼라이저 */
+.visualizer {
+    display: block;
+    width: 100%;
+    height: 60px;
+    border-radius: 8px;
+    margin-top: 12px;
+    background: var(--surface2);
+}
+
+.bpm-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+}
+.bpm-control label { color: var(--dim); font-size: 0.85rem; }
+.bpm-control input[type=range] { width: 110px; accent-color: var(--accent); }
+#bpm-value {
+    font-weight: 800;
+    color: var(--accent);
+    min-width: 36px;
+    font-size: 1.1rem;
+    text-shadow: 0 0 12px var(--accent);
+}
+
+/* 프리셋 바 */
+.preset-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 0 12px;
+    flex-wrap: wrap;
+}
+.preset-label {
+    font-size: 0.82rem;
+    color: var(--dim);
+    flex-shrink: 0;
+}
+.preset-bar select {
+    padding: 6px 10px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid #333355;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* 시퀀서 */
+.sequencer {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 16px 14px;
+    overflow-x: auto;
+}
+
+.beat-numbers,
+.track-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 5px;
+}
+
+.track-label {
+    width: 68px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-align: right;
+    letter-spacing: 0.05em;
+    transition: filter 0.1s, transform 0.1s;
+}
+
+.key-badge {
+    display: inline-block;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: var(--dim);
+    border: 1px solid #444466;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 4px;
+    vertical-align: middle;
+    line-height: 1.4;
+}
+
+@keyframes live-flash {
+    0%   { filter: brightness(2.5); transform: scale(1.2); }
+    100% { filter: brightness(1);   transform: scale(1); }
+}
+.track-label.live-hit {
+    animation: live-flash 0.18s ease-out;
+}
+
+.track-side {
+    width: 28px;
+    flex-shrink: 0;
+}
+
+.beat-nums {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 3px;
+    flex: 1;
+    margin-bottom: 6px;
+}
+
+.beat-num {
+    text-align: center;
+    font-size: 0.62rem;
+    color: var(--dim);
+}
+.beat-num.accent { color: var(--text); font-weight: 700; }
+
+/* 구분선 (4박자마다) */
+.beat-group {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 3px;
+    flex: 1;
+}
+
+.cell {
+    aspect-ratio: 1;
+    min-width: 0;
+    border-radius: 5px;
+    background: var(--surface2);
+    border: 1px solid #252540;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+    position: relative;
+}
+
+/* 4번째마다 왼쪽 구분 살짝 밝게 */
+.cell:nth-child(4n+1) { border-left-color: #3a3a5a; }
+
+.cell:hover { transform: scale(1.12); border-color: #555577; z-index: 1; }
+
+.cell.on-kick  { background: var(--kick);  box-shadow: 0 0 10px #ff336666; border-color: var(--kick); }
+.cell.on-snare { background: var(--snare); box-shadow: 0 0 10px #33ccff66; border-color: var(--snare); }
+.cell.on-hihat { background: var(--hihat); box-shadow: 0 0 10px #ffcc3366; border-color: var(--hihat); }
+.cell.on-clap  { background: var(--clap);  box-shadow: 0 0 10px #66ff8866; border-color: var(--clap); }
+
+/* 재생 위치 하이라이트 */
+.cell.playing {
+    outline: 2px solid rgba(255,255,255,0.9);
+    outline-offset: -1px;
+}
+
+@keyframes hit-pulse {
+    0%   { transform: scale(1.25); filter: brightness(1.6); }
+    100% { transform: scale(1);    filter: brightness(1); }
+}
+.cell.hit { animation: hit-pulse 0.14s ease-out; }
+
+/* 트랙 사이드 컨트롤 */
+.track-controls {
+    display: flex;
+    align-items: center;
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.mute-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #444466;
+    background: var(--surface2);
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 0.65rem;
+    font-weight: 700;
+    transition: all 0.18s;
+    flex-shrink: 0;
+}
+.mute-btn.muted { background: #ff335533; border-color: var(--kick); color: var(--kick); }
+
+.vol-slider { width: 52px; accent-color: var(--accent); cursor: pointer; }
+
+/* 패턴 바 */
+.pattern-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0 4px;
+    flex-wrap: wrap;
+}
+
+.pattern-bar select {
+    padding: 7px 12px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid #333355;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+/* 모바일 */
+@media (max-width: 580px) {
+    .logo { font-size: 1.5rem; }
+    .cell { min-width: 19px; }
+    .track-label { width: 52px; font-size: 0.7rem; }
+    .track-controls { width: 76px; }
+    .track-side { width: 76px; }
+    .vol-slider { width: 44px; }
+    .bpm-control input[type=range] { width: 80px; }
+}
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- 헤더 -->
+        <header class="header">
+            <h1 class="logo">🥁 무무드럼</h1>
+            <p class="subtitle">mumuclass by 불곰코끼리</p>
+        </header>
+
+        <!-- 컨트롤 바 -->
+        <div class="controls">
+            <button id="play-btn" class="btn btn-play">▶ Play</button>
+            <button id="stop-btn" class="btn btn-stop" style="display:none">■ Stop</button>
+            <button id="music-btn" class="btn btn-music">🎵 배경음악 OFF</button>
+            <button id="random-btn" class="btn btn-random">🎲 랜덤</button>
+
+            <!-- 스텝 수 선택 -->
+            <div class="step-selector">
+                <button class="step-btn" data-steps="8">8</button>
+                <button class="step-btn active" data-steps="16">16</button>
+                <button class="step-btn" data-steps="32">32</button>
+            </div>
+
+            <div class="bpm-control">
+                <label>BPM</label>
+                <input type="range" id="bpm-slider" min="60" max="180" value="120">
+                <span id="bpm-value">120</span>
+            </div>
+        </div>
+
+        <!-- 시퀀서 격자 -->
+        <div class="sequencer">
+            <!-- 프리셋 선택 -->
+            <div class="preset-bar">
+                <span class="preset-label">🎼 예시 비트</span>
+                <select id="preset-select">
+                    <option value="">-- 선택 --</option>
+                    <optgroup label="기본 장르">
+                        <option value="rock">🤘 기본 록</option>
+                        <option value="hiphop">🎤 힙합</option>
+                        <option value="reggae">🌴 레게</option>
+                        <option value="samba">🎺 삼바</option>
+                        <option value="funk">🕺 펑크</option>
+                    </optgroup>
+                    <optgroup label="유명 비트">
+                        <option value="acdc">🤟 Back in Black</option>
+                        <option value="bossanova">🌊 보사노바</option>
+                        <option value="disco">🪩 디스코</option>
+                        <option value="jazz">🎷 재즈</option>
+                        <option value="dnb">🎮 드럼앤베이스</option>
+                        <option value="trap">🔫 트랩</option>
+                    </optgroup>
+                </select>
+                <button id="preset-load-btn" class="btn btn-small">적용</button>
+            </div>
+
+            <div class="beat-numbers">
+                <div class="track-label"></div>
+                <div class="beat-nums" id="beat-nums"></div>
+                <div class="track-side"></div>
+            </div>
+            <div id="tracks"></div>
+
+            <!-- 비주얼라이저 -->
+            <canvas id="visualizer" class="visualizer" height="60"></canvas>
+        </div>
+
+        <!-- 패턴 저장/불러오기 -->
+        <div class="pattern-bar">
+            <button id="clear-btn" class="btn btn-small">🗑 초기화</button>
+            <button id="save-btn" class="btn btn-small">💾 저장</button>
+            <select id="pattern-select">
+                <option value="">-- 내 패턴 --</option>
+            </select>
+            <button id="load-btn" class="btn btn-small">📂 불러오기</button>
+            <button id="delete-btn" class="btn btn-small btn-danger">❌</button>
+        </div>
+    </div>
+
+    <script>
+// =============================================
+// 무무드럼 - 리듬 드럼머신
+// Web Audio API 기반, 바닐라 JS
+// =============================================
+
+// --- 설정 ---
+const TRACKS = [
+    { id: 'kick',  name: 'KICK',   color: 'kick',  key: 'd' },
+    { id: 'snare', name: 'SNARE',  color: 'snare', key: 'f' },
+    { id: 'hihat', name: 'HI-HAT', color: 'hihat', key: 'j' },
+    { id: 'clap',  name: 'CLAP',   color: 'clap',  key: 'k' },
+];
+let currentSteps = 16;
+
+// --- 예시 비트 프리셋 ---
+const PRESETS = {
+    rock:   { name:'🤘 기본 록',  bpm:120,
+        kick:  [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        clap:  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+    hiphop: { name:'🎤 힙합',     bpm:90,
+        kick:  [1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,1],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
+    reggae: { name:'🌴 레게',     bpm:100,
+        kick:  [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],
+        snare: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+        hihat: [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+        clap:  [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0] },
+    samba:  { name:'🎺 삼바',     bpm:130,
+        kick:  [1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        clap:  [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1] },
+    funk:   { name:'🕺 펑크',     bpm:110,
+        kick:  [1,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0],
+        hihat: [1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+        clap:  [0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0] },
+    acdc:   { name:'🤟 Back in Black',  bpm:92,
+        kick:  [1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],
+        hihat: [1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],
+        clap:  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+    bossanova: { name:'🌊 보사노바',    bpm:115,
+        kick:  [1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0],
+        snare: [0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0],
+        hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        clap:  [0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,1] },
+    disco:  { name:'🪩 디스코',         bpm:120,
+        kick:  [1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        clap:  [0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0] },
+    jazz:   { name:'🎷 재즈',           bpm:130,
+        kick:  [1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],
+        snare: [0,0,1,0,0,1,0,0,0,0,1,0,0,1,0,1],
+        hihat: [1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0],
+        clap:  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+    dnb:    { name:'🎮 드럼앤베이스',   bpm:170,
+        kick:  [1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0],
+        hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        clap:  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] },
+    trap:   { name:'🔫 트랩',           bpm:140,
+        kick:  [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0],
+        snare: [0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],
+        hihat: [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        clap:  [0,0,1,0,0,1,0,0,0,1,0,0,0,0,1,0] },
+};
+
+const PRESET_BG = {
+    rock:'rock', acdc:'rock',
+    hiphop:'hiphop',
+    trap:'trap',
+    reggae:'reggae',
+    samba:'bossanova', bossanova:'bossanova',
+    funk:'funk', disco:'funk',
+    jazz:'jazz',
+    dnb:'dnb',
+};
+
+// --- 상태 ---
+let bpm = 120;
+let isPlaying = false;
+let currentStep = -1;
+let schedulerId = null;
+let audioCtx = null;
+let analyser = null;
+let bgMusicEnabled = false;
+let bgGain = null;
+let vizRafId = null;
+let currentBgStyle = 'default';
+
+const grid = {};
+TRACKS.forEach(t => { grid[t.id] = new Array(currentSteps).fill(false); });
+
+const muted = {};
+const gains = {};
+TRACKS.forEach(t => { muted[t.id] = false; });
+
+// =============================================
+// 오디오 초기화
+// =============================================
+function initAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const masterGain = audioCtx.createGain();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    masterGain.connect(analyser);
+    analyser.connect(audioCtx.destination);
+
+    TRACKS.forEach(t => {
+        const g = audioCtx.createGain();
+        g.connect(masterGain);
+        gains[t.id] = g;
+    });
+
+    bgGain = audioCtx.createGain();
+    bgGain.gain.value = 0;
+    bgGain.connect(masterGain);
+
+    startVisualizer();
+}
+
+async function resumeAudio() {
+    if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
+}
+
+// =============================================
+// 드럼 사운드 합성
+// =============================================
+function playDrum(type) {
+    const t = audioCtx.currentTime;
+    if (type === 'kick')  synthKick(t);
+    if (type === 'snare') synthSnare(t);
+    if (type === 'hihat') synthHihat(t);
+    if (type === 'clap')  synthClap(t);
+}
+
+function synthKick(t) {
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(160, t);
+    osc.frequency.exponentialRampToValueAtTime(28, t + 0.18);
+    env.gain.setValueAtTime(1, t);
+    env.gain.exponentialRampToValueAtTime(0.01, t + 0.32);
+    osc.connect(env); env.connect(gains.kick);
+    osc.start(t); osc.stop(t + 0.32);
+
+    const o2 = audioCtx.createOscillator();
+    const e2 = audioCtx.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(420, t);
+    o2.frequency.exponentialRampToValueAtTime(55, t + 0.04);
+    e2.gain.setValueAtTime(0.7, t);
+    e2.gain.exponentialRampToValueAtTime(0.01, t + 0.04);
+    o2.connect(e2); e2.connect(gains.kick);
+    o2.start(t); o2.stop(t + 0.05);
+}
+
+function synthSnare(t) {
+    const osc = audioCtx.createOscillator();
+    const oe  = audioCtx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(210, t);
+    osc.frequency.exponentialRampToValueAtTime(90, t + 0.1);
+    oe.gain.setValueAtTime(0.65, t);
+    oe.gain.exponentialRampToValueAtTime(0.01, t + 0.11);
+    osc.connect(oe); oe.connect(gains.snare);
+    osc.start(t); osc.stop(t + 0.12);
+
+    const noise = makeNoise(0.18);
+    const ne = audioCtx.createGain();
+    const hp = audioCtx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 1800;
+    ne.gain.setValueAtTime(0.9, t);
+    ne.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+    noise.connect(hp); hp.connect(ne); ne.connect(gains.snare);
+    noise.start(t); noise.stop(t + 0.18);
+}
+
+function synthHihat(t) {
+    const noise = makeNoise(0.07);
+    const env   = audioCtx.createGain();
+    const hp    = audioCtx.createBiquadFilter();
+    const bp    = audioCtx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 7000;
+    bp.type = 'bandpass'; bp.frequency.value = 9500; bp.Q.value = 1.2;
+    env.gain.setValueAtTime(0.55, t);
+    env.gain.exponentialRampToValueAtTime(0.01, t + 0.06);
+    noise.connect(hp); hp.connect(bp); bp.connect(env); env.connect(gains.hihat);
+    noise.start(t); noise.stop(t + 0.07);
+}
+
+function synthClap(t) {
+    for (let i = 0; i < 3; i++) {
+        const n = makeNoise(0.04);
+        const e = audioCtx.createGain();
+        const f = audioCtx.createBiquadFilter();
+        f.type = 'bandpass'; f.frequency.value = 2400; f.Q.value = 2.5;
+        const off = i * 0.012;
+        e.gain.setValueAtTime(0, t + off);
+        e.gain.linearRampToValueAtTime(0.9, t + off + 0.005);
+        e.gain.exponentialRampToValueAtTime(0.01, t + off + 0.045);
+        n.connect(f); f.connect(e); e.connect(gains.clap);
+        n.start(t + off); n.stop(t + off + 0.05);
+    }
+    const tail = makeNoise(0.13);
+    const te = audioCtx.createGain();
+    const tf = audioCtx.createBiquadFilter();
+    tf.type = 'bandpass'; tf.frequency.value = 2400; tf.Q.value = 2;
+    te.gain.setValueAtTime(0.55, t + 0.03);
+    te.gain.exponentialRampToValueAtTime(0.01, t + 0.13);
+    tail.connect(tf); tf.connect(te); te.connect(gains.clap);
+    tail.start(t + 0.03); tail.stop(t + 0.13);
+}
+
+function makeNoise(duration) {
+    const sr  = audioCtx.sampleRate;
+    const len = Math.ceil(sr * duration);
+    const buf = audioCtx.createBuffer(1, len, sr);
+    const ch  = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    return src;
+}
+
+// =============================================
+// 비주얼라이저
+// =============================================
+function startVisualizer() {
+    const canvas = document.getElementById('visualizer');
+    const ctx2d  = canvas.getContext('2d');
+    const COLORS = ['#ff3366','#ff6644','#ffcc33','#44ff88','#33ccff','#aa55ff'];
+
+    function draw() {
+        vizRafId = requestAnimationFrame(draw);
+        const W = canvas.offsetWidth;
+        const H = canvas.height;
+        canvas.width = W;
+
+        const bufLen = analyser.frequencyBinCount;
+        const data   = new Uint8Array(bufLen);
+        analyser.getByteFrequencyData(data);
+
+        ctx2d.clearRect(0, 0, W, H);
+
+        const grad = ctx2d.createLinearGradient(0, 0, W, 0);
+        grad.addColorStop(0,   '#ff336611');
+        grad.addColorStop(0.5, '#aa55ff11');
+        grad.addColorStop(1,   '#33ccff11');
+        ctx2d.fillStyle = grad;
+        ctx2d.fillRect(0, 0, W, H);
+
+        const barCount = 64;
+        const barW = (W / barCount) - 1;
+
+        for (let i = 0; i < barCount; i++) {
+            const val     = data[i * 2];
+            const barH    = (val / 255) * H;
+            const colorIdx = Math.floor((i / barCount) * COLORS.length);
+            const color    = COLORS[colorIdx];
+
+            ctx2d.fillStyle = color;
+            ctx2d.globalAlpha = 0.85;
+            ctx2d.fillRect(i * (barW + 1), H - barH, barW, barH);
+
+            ctx2d.shadowBlur = 8;
+            ctx2d.shadowColor = color;
+            ctx2d.fillRect(i * (barW + 1), H - barH, barW, Math.min(barH, 3));
+        }
+
+        ctx2d.globalAlpha = 1;
+        ctx2d.shadowBlur  = 0;
+    }
+    draw();
+}
+
+// =============================================
+// 배경음악
+// =============================================
+function sd() { return 60 / bpm / 4; }
+
+function bgHit(freq, vol, dur, type = 'triangle') {
+    const t   = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const env = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    env.gain.setValueAtTime(vol, t);
+    env.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    osc.connect(env); env.connect(bgGain);
+    osc.start(t); osc.stop(t + dur + 0.01);
+}
+
+const BG_STYLES = {
+    default: (step) => {
+        const NOTES = [65.41, 98.00, 110.00, 87.31];
+        const freq  = NOTES[Math.floor(step / 4) % 4];
+        const s     = sd();
+        bgHit(freq, 0.3, s * 0.9);
+        if (step % 4 === 0) {
+            [freq * 2, freq * 2.5, freq * 3].forEach(f => {
+                const t = audioCtx.currentTime;
+                const o = audioCtx.createOscillator();
+                const e = audioCtx.createGain();
+                o.type = 'sine'; o.frequency.value = f;
+                e.gain.setValueAtTime(0.04, t);
+                e.gain.linearRampToValueAtTime(0, t + s * 4);
+                o.connect(e); e.connect(bgGain);
+                o.start(t); o.stop(t + s * 4);
+            });
+        }
+    },
+    rock: (step) => {
+        if (step % 2 !== 0) return;
+        const line = [41.20, 0, 41.20, 0, 36.71, 0, 41.20, 44.00];
+        const freq = line[step % 8];
+        if (!freq) return;
+        const t = audioCtx.currentTime;
+        const s = sd();
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        const ws  = audioCtx.createWaveShaper();
+        const c   = new Float32Array(256);
+        for (let i = 0; i < 256; i++) { const x = i / 128 - 1; c[i] = x / (1 + Math.abs(x) * 3); }
+        ws.curve = c;
+        osc.type = 'sawtooth'; osc.frequency.value = freq;
+        env.gain.setValueAtTime(0.45, t);
+        env.gain.exponentialRampToValueAtTime(0.001, t + s * 1.8);
+        osc.connect(ws); ws.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s * 2);
+        bgHit(freq * 1.498, 0.15, s * 1.5, 'sawtooth');
+    },
+    hiphop: (step) => {
+        const hits = [0, 6, 10];
+        if (!hits.includes(step % 16)) return;
+        const NOTES = [41.20, 41.20, 32.70, 43.65];
+        const freq  = NOTES[Math.floor(step / 4) % 4];
+        const t = audioCtx.currentTime;
+        const s = sd();
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.value = freq;
+        env.gain.setValueAtTime(0.8, t);
+        env.gain.exponentialRampToValueAtTime(0.001, t + s * 7);
+        osc.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s * 8);
+    },
+    trap: (step) => {
+        if (step % 16 !== 0 && step % 16 !== 8) return;
+        const t = audioCtx.currentTime;
+        const s = sd();
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(82, t);
+        osc.frequency.exponentialRampToValueAtTime(24, t + s * 8);
+        env.gain.setValueAtTime(0.85, t);
+        env.gain.setValueAtTime(0.7,  t + s * 2);
+        env.gain.exponentialRampToValueAtTime(0.001, t + s * 9);
+        osc.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s * 10);
+    },
+    reggae: (step) => {
+        if (![2, 6, 10, 14].includes(step % 16)) return;
+        const CHORDS = [
+            [65.41, 82.41, 98.00],
+            [87.31, 110.00, 130.81],
+            [73.42, 92.50, 110.00],
+            [87.31, 110.00, 130.81],
+        ];
+        const chord = CHORDS[Math.floor(step / 4) % 4];
+        const t = audioCtx.currentTime;
+        const s = sd();
+        chord.forEach(freq => {
+            const osc = audioCtx.createOscillator();
+            const env = audioCtx.createGain();
+            const lp  = audioCtx.createBiquadFilter();
+            osc.type = 'square'; osc.frequency.value = freq;
+            lp.type = 'lowpass'; lp.frequency.value = 900;
+            env.gain.setValueAtTime(0.07, t);
+            env.gain.exponentialRampToValueAtTime(0.001, t + s * 1.5);
+            osc.connect(lp); lp.connect(env); env.connect(bgGain);
+            osc.start(t); osc.stop(t + s * 2);
+        });
+    },
+    bossanova: (step) => {
+        const CHORDS = [
+            [65.41, 82.41, 98.00, 130.81],
+            [98.00, 123.47, 146.83, 196.00],
+            [110.00, 130.81, 164.81, 220.00],
+            [87.31, 110.00, 130.81, 174.61],
+        ];
+        const chord = CHORDS[Math.floor(step / 4) % 4];
+        const freq  = chord[step % 4];
+        bgHit(freq, 0.18, sd() * 2.2, 'triangle');
+    },
+    funk: (step) => {
+        const LINE = [65.41, 0, 73.42, 77.78, 65.41, 0, 82.41, 0,
+                      65.41, 0, 73.42, 77.78, 87.31, 0, 82.41, 0];
+        const freq = LINE[step % 16];
+        if (!freq) return;
+        const t = audioCtx.currentTime;
+        const s = sd();
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        const lp  = audioCtx.createBiquadFilter();
+        osc.type = 'sawtooth'; osc.frequency.value = freq;
+        lp.type = 'lowpass'; lp.frequency.value = 700;
+        env.gain.setValueAtTime(0.38, t);
+        env.gain.exponentialRampToValueAtTime(0.001, t + s * 0.75);
+        osc.connect(lp); lp.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s);
+    },
+    jazz: (step) => {
+        if (step % 4 !== 0) return;
+        const WALK = [65.41, 69.30, 73.42, 77.78, 82.41, 77.78, 73.42, 69.30];
+        const freq = WALK[Math.floor(step / 4) % 8];
+        const t = audioCtx.currentTime;
+        const s = sd() * 4;
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        osc.type = 'triangle'; osc.frequency.value = freq;
+        env.gain.setValueAtTime(0, t);
+        env.gain.linearRampToValueAtTime(0.32, t + 0.02);
+        env.gain.setValueAtTime(0.28, t + s * 0.75);
+        env.gain.linearRampToValueAtTime(0, t + s);
+        osc.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s);
+    },
+    dnb: (step) => {
+        const ARP = [110.00, 130.81, 164.81, 196.00, 220.00, 196.00, 164.81, 130.81];
+        const freq = ARP[step % 8];
+        const t = audioCtx.currentTime;
+        const s = sd();
+        const osc = audioCtx.createOscillator();
+        const env = audioCtx.createGain();
+        osc.type = 'square'; osc.frequency.value = freq;
+        env.gain.setValueAtTime(0.13, t);
+        env.gain.exponentialRampToValueAtTime(0.001, t + s * 0.65);
+        osc.connect(env); env.connect(bgGain);
+        osc.start(t); osc.stop(t + s);
+    },
+};
+
+const BG_STYLE_LABELS = {
+    default:'🎵', rock:'🎸', hiphop:'🎤', trap:'🔫',
+    reggae:'🌴', bossanova:'🌊', funk:'🕺', jazz:'🎷', dnb:'🎮',
+};
+
+function playBassNote(step) {
+    if (!bgMusicEnabled || !bgGain) return;
+    const fn = BG_STYLES[currentBgStyle] || BG_STYLES.default;
+    fn(step);
+}
+
+function updateMusicBtn() {
+    const btn = document.getElementById('music-btn');
+    const icon = BG_STYLE_LABELS[currentBgStyle] || '🎵';
+    btn.textContent = bgMusicEnabled ? `${icon} 배경음악 ON` : `${icon} 배경음악 OFF`;
+    btn.classList.toggle('active', bgMusicEnabled);
+}
+
+function toggleBgMusic() {
+    initAudio();
+    resumeAudio();
+    bgMusicEnabled = !bgMusicEnabled;
+    bgGain.gain.value = bgMusicEnabled ? 1 : 0;
+    updateMusicBtn();
+}
+
+// =============================================
+// 시퀀서
+// =============================================
+function startPlay() {
+    if (isPlaying) return;
+    initAudio();
+    resumeAudio();
+    isPlaying    = true;
+    currentStep  = -1;
+    const interval = (60 / bpm / 4) * 1000;
+    schedulerId = setInterval(tick, interval);
+    document.getElementById('play-btn').style.display = 'none';
+    document.getElementById('stop-btn').style.display = '';
+}
+
+function stopPlay() {
+    isPlaying = false;
+    clearInterval(schedulerId);
+    schedulerId = null;
+    document.querySelectorAll('.cell.playing').forEach(c => c.classList.remove('playing'));
+    currentStep = -1;
+    document.getElementById('play-btn').style.display = '';
+    document.getElementById('stop-btn').style.display = 'none';
+}
+
+function tick() {
+    document.querySelectorAll('.cell.playing').forEach(c => c.classList.remove('playing'));
+    currentStep = (currentStep + 1) % currentSteps;
+    document.querySelectorAll(`.cell[data-step="${currentStep}"]`).forEach(c => c.classList.add('playing'));
+    playBassNote(currentStep);
+
+    TRACKS.forEach(t => {
+        if (grid[t.id][currentStep] && !muted[t.id]) {
+            playDrum(t.id);
+            const cell = document.querySelector(`.cell[data-track="${t.id}"][data-step="${currentStep}"]`);
+            if (cell) {
+                cell.classList.remove('hit');
+                void cell.offsetWidth;
+                cell.classList.add('hit');
+            }
+        }
+    });
+}
+
+// =============================================
+// 스텝 수 변경
+// =============================================
+function setSteps(n) {
+    const wasPlaying = isPlaying;
+    if (wasPlaying) stopPlay();
+
+    TRACKS.forEach(t => {
+        const old = grid[t.id];
+        grid[t.id] = new Array(n).fill(false);
+        for (let i = 0; i < Math.min(old.length, n); i++) grid[t.id][i] = old[i];
+    });
+    currentSteps = n;
+
+    document.querySelectorAll('.step-btn').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.steps) === n);
+    });
+
+    rebuildSequencerUI();
+    if (wasPlaying) startPlay();
+}
+
+// =============================================
+// 랜덤 비트
+// =============================================
+function randomBeat() {
+    initAudio();
+    resumeAudio();
+    clearGrid();
+
+    const KICK_P  = [0.9, 0.05, 0.05, 0.2, 0.35, 0.05, 0.25, 0.2, 0.8, 0.05, 0.15, 0.2, 0.35, 0.05, 0.1, 0.2];
+    const SNARE_P = [0.05,0.05,0.1, 0.05, 0.9, 0.05, 0.15, 0.05,0.05,0.05,0.15, 0.05, 0.9, 0.05, 0.2, 0.1];
+    const HIHAT_P = [0.8, 0.2, 0.7, 0.2, 0.8, 0.3, 0.7, 0.2, 0.8, 0.2, 0.7, 0.3, 0.8, 0.3, 0.7, 0.4];
+    const CLAP_P  = [0.05,0.05,0.05,0.05, 0.6, 0.05,0.1, 0.05,0.05,0.05,0.1, 0.05, 0.6, 0.05,0.1, 0.1];
+    const PROBS = { kick: KICK_P, snare: SNARE_P, hihat: HIHAT_P, clap: CLAP_P };
+
+    for (let i = 0; i < currentSteps; i++) {
+        const ref = i % 16;
+        TRACKS.forEach(t => {
+            const prob = PROBS[t.id][ref];
+            if (Math.random() < prob) {
+                grid[t.id][i] = true;
+                const cell = document.querySelector(`.cell[data-track="${t.id}"][data-step="${i}"]`);
+                if (cell) cell.classList.add(`on-${t.color}`);
+            }
+        });
+    }
+
+    bpm = (Math.floor(Math.random() * 7) + 8) * 10;
+    document.getElementById('bpm-slider').value = bpm;
+    document.getElementById('bpm-value').textContent = bpm;
+    if (isPlaying) { stopPlay(); startPlay(); }
+}
+
+// =============================================
+// 프리셋 적용
+// =============================================
+function applyPreset() {
+    const key = document.getElementById('preset-select').value;
+    if (!key || !PRESETS[key]) return;
+    const p = PRESETS[key];
+
+    clearGrid();
+
+    TRACKS.forEach(t => {
+        for (let i = 0; i < currentSteps; i++) {
+            const ref = i % 16;
+            if (p[t.id][ref]) {
+                grid[t.id][i] = true;
+                const cell = document.querySelector(`.cell[data-track="${t.id}"][data-step="${i}"]`);
+                if (cell) cell.classList.add(`on-${t.color}`);
+            }
+        }
+    });
+
+    bpm = p.bpm;
+    document.getElementById('bpm-slider').value = bpm;
+    document.getElementById('bpm-value').textContent = bpm;
+
+    currentBgStyle = PRESET_BG[key] || 'default';
+    updateMusicBtn();
+
+    if (isPlaying) { stopPlay(); startPlay(); }
+}
+
+// =============================================
+// UI 생성
+// =============================================
+function rebuildSequencerUI() {
+    const beatNums = document.getElementById('beat-nums');
+    beatNums.innerHTML = '';
+    for (let i = 0; i < currentSteps; i++) {
+        const el = document.createElement('div');
+        el.className = 'beat-num' + (i % 4 === 0 ? ' accent' : '');
+        el.textContent = i + 1;
+        beatNums.appendChild(el);
+    }
+
+    const container = document.getElementById('tracks');
+    container.innerHTML = '';
+    TRACKS.forEach(track => {
+        const row = document.createElement('div');
+        row.className = 'track-row';
+
+        const label = document.createElement('div');
+        label.className = 'track-label';
+        label.dataset.track = track.id;
+        label.style.color = `var(--${track.color})`;
+        label.innerHTML = `${track.name}<span class="key-badge">${track.key.toUpperCase()}</span>`;
+        row.appendChild(label);
+
+        const cellGrid = document.createElement('div');
+        cellGrid.className = 'beat-group';
+        for (let i = 0; i < currentSteps; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.track = track.id;
+            cell.dataset.step  = i;
+            if (grid[track.id][i]) cell.classList.add(`on-${track.color}`);
+            cell.addEventListener('click', () => onCellClick(track.id, i, cell));
+            cellGrid.appendChild(cell);
+        }
+        row.appendChild(cellGrid);
+
+        const controls = document.createElement('div');
+        controls.className = 'track-controls';
+        const muteBtn = document.createElement('button');
+        muteBtn.className = 'mute-btn';
+        muteBtn.textContent = 'M';
+        muteBtn.title = '뮤트';
+        muteBtn.classList.toggle('muted', muted[track.id]);
+        muteBtn.addEventListener('click', () => {
+            muted[track.id] = !muted[track.id];
+            muteBtn.classList.toggle('muted', muted[track.id]);
+            if (gains[track.id]) gains[track.id].gain.value = muted[track.id] ? 0 : 1;
+        });
+        controls.appendChild(muteBtn);
+        row.appendChild(controls);
+        container.appendChild(row);
+    });
+}
+
+// =============================================
+// 키보드 라이브 연주
+// =============================================
+function liveHit(trackId) {
+    playDrum(trackId);
+    const label = document.querySelector(`.track-label[data-track="${trackId}"]`);
+    if (label) {
+        label.classList.remove('live-hit');
+        void label.offsetWidth;
+        label.classList.add('live-hit');
+    }
+    if (isPlaying && currentStep >= 0) {
+        const cell = document.querySelector(`.cell[data-track="${trackId}"][data-step="${currentStep}"]`);
+        if (cell) {
+            cell.classList.remove('hit');
+            void cell.offsetWidth;
+            cell.classList.add('hit');
+        }
+    }
+}
+
+function onCellClick(trackId, step, cell) {
+    initAudio();
+    resumeAudio();
+    grid[trackId][step] = !grid[trackId][step];
+    const colorClass = `on-${TRACKS.find(t => t.id === trackId).color}`;
+    if (grid[trackId][step]) {
+        cell.classList.add(colorClass);
+        playDrum(trackId);
+    } else {
+        cell.classList.remove(colorClass);
+    }
+}
+
+// =============================================
+// 패턴 저장/불러오기
+// =============================================
+function savePattern() {
+    const name = prompt('패턴 이름을 입력하세요:');
+    if (!name || !name.trim()) return;
+    const patterns = JSON.parse(localStorage.getItem('mumuajik-patterns') || '{}');
+    const entries = Object.entries(patterns);
+    if (entries.length >= 5) {
+        entries.sort((a, b) => a[1].ts - b[1].ts);
+        delete patterns[entries[0][0]];
+    }
+    patterns[name.trim()] = { grid: JSON.parse(JSON.stringify(grid)), bpm, steps: currentSteps, ts: Date.now() };
+    localStorage.setItem('mumuajik-patterns', JSON.stringify(patterns));
+    refreshPatternList();
+    alert(`"${name.trim()}" 패턴 저장 완료!`);
+}
+
+function loadPattern() {
+    const name = document.getElementById('pattern-select').value;
+    if (!name) return;
+    const patterns = JSON.parse(localStorage.getItem('mumuajik-patterns') || '{}');
+    const p = patterns[name];
+    if (!p) return;
+
+    if (p.steps && p.steps !== currentSteps) setSteps(p.steps);
+    clearGrid();
+    Object.assign(grid, p.grid);
+    bpm = p.bpm;
+    document.getElementById('bpm-slider').value = bpm;
+    document.getElementById('bpm-value').textContent = bpm;
+    TRACKS.forEach(t => {
+        for (let i = 0; i < currentSteps; i++) {
+            if (grid[t.id][i]) {
+                const cell = document.querySelector(`.cell[data-track="${t.id}"][data-step="${i}"]`);
+                if (cell) cell.classList.add(`on-${t.color}`);
+            }
+        }
+    });
+}
+
+function deletePattern() {
+    const name = document.getElementById('pattern-select').value;
+    if (!name) return;
+    if (!confirm(`"${name}" 패턴을 삭제할까요?`)) return;
+    const patterns = JSON.parse(localStorage.getItem('mumuajik-patterns') || '{}');
+    delete patterns[name];
+    localStorage.setItem('mumuajik-patterns', JSON.stringify(patterns));
+    refreshPatternList();
+}
+
+function refreshPatternList() {
+    const select = document.getElementById('pattern-select');
+    select.innerHTML = '<option value="">-- 내 패턴 --</option>';
+    const patterns = JSON.parse(localStorage.getItem('mumuajik-patterns') || '{}');
+    Object.keys(patterns).forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        select.appendChild(opt);
+    });
+}
+
+function clearGrid() {
+    TRACKS.forEach(t => { grid[t.id].fill(false); });
+    document.querySelectorAll('.cell').forEach(cell => {
+        TRACKS.forEach(t => cell.classList.remove(`on-${t.color}`));
+    });
+}
+
+// =============================================
+// 초기화
+// =============================================
+window.addEventListener('DOMContentLoaded', () => {
+    rebuildSequencerUI();
+    refreshPatternList();
+
+    document.getElementById('play-btn').addEventListener('click', startPlay);
+    document.getElementById('stop-btn').addEventListener('click', stopPlay);
+    document.getElementById('clear-btn').addEventListener('click', clearGrid);
+    document.getElementById('save-btn').addEventListener('click', savePattern);
+    document.getElementById('load-btn').addEventListener('click', loadPattern);
+    document.getElementById('delete-btn').addEventListener('click', deletePattern);
+    document.getElementById('music-btn').addEventListener('click', toggleBgMusic);
+    document.getElementById('preset-load-btn').addEventListener('click', applyPreset);
+    document.getElementById('random-btn').addEventListener('click', randomBeat);
+
+    document.querySelectorAll('.step-btn').forEach(btn => {
+        btn.addEventListener('click', () => setSteps(parseInt(btn.dataset.steps)));
+    });
+
+    const bpmSlider = document.getElementById('bpm-slider');
+    bpmSlider.addEventListener('input', () => {
+        bpm = parseInt(bpmSlider.value);
+        document.getElementById('bpm-value').textContent = bpm;
+        if (isPlaying) { stopPlay(); startPlay(); }
+    });
+
+    const KEY_MAP = {};
+    TRACKS.forEach(t => { KEY_MAP[t.key] = t.id; });
+
+    document.addEventListener('keydown', e => {
+        if (e.repeat) return;
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+        const key = e.key.toLowerCase();
+        if (key === ' ') { e.preventDefault(); isPlaying ? stopPlay() : startPlay(); return; }
+        if (KEY_MAP[key]) { initAudio(); resumeAudio(); liveHit(KEY_MAP[key]); }
+    });
+});
+    </script>
+</body>
+</html>
